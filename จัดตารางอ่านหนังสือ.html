@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดตารางการอ่านหนังสือ</title>
+    <style>
+        /* การตกแต่งส่วนพื้นฐาน */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        /* ส่วนของกล่องรับข้อมูล */
+        section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #34495e;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box; /* ป้องกัน input ล้นขอบ */
+            font-size: 1em;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* ส่วนของตารางแสดงผล */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background-color: #f1f9ff;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+
+        .status-cell {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📅 Study Planner</h1>
+
+    <section>
+        <h3>เพิ่มแผนการอ่านหนังสือ</h3>
+        <div class="input-group">
+            <label>วิชาที่ต้องเตรียมตัว</label>
+            <input type="text" id="subjectName" placeholder="เช่น Web Development">
+        </div>
+        <div class="input-group">
+            <label>วันสอบ</label>
+            <input type="date" id="examDate">
+        </div>
+        <div class="input-group">
+            <label>จำนวนบททั้งหมด</label>
+            <input type="number" id="totalChapters" placeholder="เช่น 12">
+        </div>
+        <button onclick="calculatePlan()">สร้างตารางการอ่าน</button>
+    </section>
+
+    <section style="max-width: 800px;">
+        <h3>ตารางสรุปแผนรายวัน</h3>
+        <table id="planTable">
+            <thead>
+                <tr>
+                    <th>วันที่</th>
+                    <th>วิชา</th>
+                    <th>งานที่ต้องทำ</th>
+                    <th class="status-cell">สถานะ</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </section>
+
+    <script>
+        function calculatePlan() {
+            const subject = document.getElementById('subjectName').value;
+            const examDateInput = document.getElementById('examDate').value;
+            const totalChapters = parseInt(document.getElementById('totalChapters').value);
+            
+            if (!subject || !examDateInput || isNaN(totalChapters)) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วนนะครับ");
+                return;
+            }
+
+            const examDate = new Date(examDateInput);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            examDate.setHours(0, 0, 0, 0);
+
+            const diffTime = examDate - today;
+            const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (daysLeft <= 0) {
+                alert("วันสอบต้องเป็นวันพรุ่งนี้เป็นต้นไปครับ");
+                return;
+            }
+
+            const chaptersPerDay = Math.ceil(totalChapters / daysLeft);
+            const tableBody = document.querySelector('#planTable tbody');
+            tableBody.innerHTML = '';
+
+            for (let i = 0; i < daysLeft; i++) {
+                let currentDate = new Date();
+                currentDate.setDate(today.getDate() + i);
+
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${currentDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</td>
+                    <td><strong>${subject}</strong></td>
+                    <td>อ่าน ${chaptersPerDay} บท</td>
+                    <td class="status-cell"><input type="checkbox"></td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+    </script>
+
+</body>
+</html>
